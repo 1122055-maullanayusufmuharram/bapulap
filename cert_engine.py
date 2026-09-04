@@ -152,11 +152,13 @@ def convert_docx_to_pdf(docx_path: str, pdf_path: str = None) -> str:
         except Exception:
             pass
 
-    import pythoncom
     try:
+        import pythoncom
         pythoncom.CoInitialize()
-    except Exception:
-        pass
+    except (ImportError, Exception):
+        # pythoncom / Word COM only exists on Windows with Microsoft Word.
+        # Safely skip on Linux / Vercel Serverless.
+        return None
 
     word = None
     doc = None
