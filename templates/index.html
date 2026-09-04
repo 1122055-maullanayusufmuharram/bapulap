@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProDeks - Siliwangi University Portal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="dashboard-body">
+    <div class="admin-wrapper">
+        <!-- LEFT SIDEBAR - EXACT AS SCREENSHOT -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo-badge">
+                    <img src="/static/assets/unsil_logo.png" alt="Logo UNSIL" onerror="this.src='/static/assets/image2.png'">
+                </div>
+                <div class="brand-info">
+                    <h2>ProDeks</h2>
+                    <div class="brand-sub">Siliwangi University</div>
+                </div>
+            </div>
+
+            <div class="sidebar-menu-label">GENERATOR</div>
+            <nav class="sidebar-nav">
+                <button type="button" class="nav-item active" id="nav-cert-gen" onclick="switchSubMenu('cert-gen')">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Studio Satuan</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-bulk-excel" onclick="switchSubMenu('bulk-excel')">
+                    <i class="fa-solid fa-table"></i>
+                    <span>Bulk Excel Studio</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-menu-label">DATABASE</div>
+            <nav class="sidebar-nav">
+                <button type="button" class="nav-item" id="nav-cert-hist" onclick="switchSubMenu('cert-hist')">
+                    <i class="fa-solid fa-folder"></i>
+                    <span>Riwayat & Cari (DB)</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-menu-label">PENGATURAN</div>
+            <nav class="sidebar-nav">
+                <button type="button" class="nav-item" id="nav-dir-wa" onclick="switchSubMenu('dir-wa')">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span>Directory & WA Cetak</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-gdrive" onclick="switchSubMenu('gdrive')">
+                    <i class="fa-solid fa-cloud"></i>
+                    <span>Google Drive Cloud</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-menu-label">MODUL BAPU & JURNAL</div>
+            <nav class="sidebar-nav">
+                <button type="button" class="nav-item" id="nav-bapu" onclick="switchSubMenu('bapu')">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>BAPU TELP Online</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-laporan" onclick="switchSubMenu('laporan')">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Laporan Harian</span>
+                </button>
+                <button type="button" class="nav-item" id="nav-api-docs" onclick="switchSubMenu('api-docs')">
+                    <i class="fa-solid fa-code"></i>
+                    <span>Dokumentasi API & Gateway</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-sm">
+                    <i class="fa-solid fa-circle" style="font-size: 8px; color: #10b981;"></i>
+                    <span>SQLite DB Active</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT WRAPPER -->
+        <div class="main-content-wrapper">
+            <!-- TOPBAR HEADER -->
+            <header class="topbar">
+                <div class="header-page-title" id="page-header-title">
+                    <strong>Studio Satuan</strong> — <span>Buat Sertifikat Satu Per Satu</span>
+                </div>
+
+                <div class="topbar-right">
+                    <button type="button" class="btn-pill" onclick="loadSampleData()">
+                        <i class="fa-solid fa-rotate-right"></i> Isi Data Contoh
+                    </button>
+                    <button type="button" class="btn-pill" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i> Cetak Langsung
+                    </button>
+                </div>
+            </header>
+
+            <!-- DASHBOARD CONTAINER -->
+            <main class="dashboard-container">
+
+                <!-- ====================================================== -->
+                <!-- MODULE 1: STUDIO SATUAN (EXACT PIXEL-PERFECT LAYOUT) -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-cert-gen-content" class="sub-menu-view">
+                    <div class="studio-container">
+                        <!-- LEFT: Form Controls Panel -->
+                        <div class="form-side">
+                            <!-- 1. IDENTITAS & DATA PESERTA -->
+                            <div class="studio-card">
+                                <div class="card-heading">
+                                    <div class="card-title">1. Nomor Sertifikat & Data Peserta</div>
+                                    <button type="button" class="btn-pill" style="padding:2px 8px; font-size:10px;" onclick="loadSampleData()">
+                                        <i class="fa-solid fa-pen-to-square"></i> Contoh Data
+                                    </button>
+                                </div>
+
+                                <div class="cert-number-banner">
+                                    <span class="cert-label">Nomor Sertifikat Akhir:</span>
+                                    <span id="live_cert_code" class="cert-code">135512SULCUN58038GA</span>
+                                </div>
+
+                                <div class="grid-2" style="margin-bottom: 8px;">
+                                    <div class="form-field">
+                                        <label>No Kode</label>
+                                        <input type="text" id="kd_doc" value="135512" oninput="onFormChange()">
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Kode Lembaga <span class="badge-tag badge-locked">Terkunci</span></label>
+                                        <input type="text" id="kd_lem" value="SULCUN58" readonly class="input-locked">
+                                    </div>
+                                </div>
+
+                                <div class="grid-2" style="margin-bottom: 8px;">
+                                    <div class="form-field">
+                                        <label>No Urut (3 Digit)</label>
+                                        <input type="text" id="no_urut" value="038" oninput="onFormChange()">
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Inisial <span class="badge-tag badge-locked">Auto (2 Huruf Pertama)</span></label>
+                                        <input type="text" id="inisial" value="GA" readonly class="input-locked">
+                                    </div>
+                                </div>
+
+                                <div class="form-field" style="margin-bottom: 8px;">
+                                    <label>Nama Lengkap Peserta <span class="badge-tag badge-auto">Auto Capslock</span></label>
+                                    <input type="text" id="nama" class="input-caps" value="GAYA NAYLA HUMAIRA HERDIAWAN" oninput="onNamaInput()">
+                                </div>
+
+                                <div class="grid-2" style="margin-bottom: 8px;">
+                                    <div class="form-field">
+                                        <label>Tanggal Lahir (DD/MM/YYYY)</label>
+                                        <input type="text" id="tgl_lahir" value="04/01/2009" placeholder="04/01/2009" oninput="onFormChange()">
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Sex</label>
+                                        <select id="gender" onchange="onFormChange()">
+                                            <option value="F (Female)" selected>F (Female)</option>
+                                            <option value="M (Male)">M (Male)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid-2">
+                                    <div class="form-field">
+                                        <label>Native Country</label>
+                                        <input type="text" id="negara" value="Indonesia" oninput="onFormChange()">
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Native Language</label>
+                                        <input type="text" id="bahasa" value="Indonesian" oninput="onFormChange()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. TANGGAL TES & NILAI SKOR -->
+                            <div class="studio-card">
+                                <div class="card-heading">
+                                    <div class="card-title">2. Tanggal Tes & Nilai Skor</div>
+                                </div>
+
+                                <div class="grid-2" style="margin-bottom: 8px;">
+                                    <div class="form-field">
+                                        <label>📅 Tanggal Tes (DD/MM/YYYY)</label>
+                                        <input type="text" id="tgl_tes" value="19/12/2025" placeholder="19/12/2025" oninput="onFormChange()">
+                                    </div>
+                                    <div class="form-field">
+                                        <label>Valid Until <span class="badge-tag badge-auto">+2 Tahun</span></label>
+                                        <input type="text" id="tgl_exp" class="input-highlight" value="19/12/2027" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="grid-4">
+                                    <div class="score-card">
+                                        <label>Listening</label>
+                                        <input type="text" id="score_l" value="56" oninput="onFormChange()">
+                                    </div>
+                                    <div class="score-card">
+                                        <label>Structure</label>
+                                        <input type="text" id="score_s" value="53" oninput="onFormChange()">
+                                    </div>
+                                    <div class="score-card">
+                                        <label>Reading</label>
+                                        <input type="text" id="score_r" value="50" oninput="onFormChange()">
+                                    </div>
+                                    <div class="score-card score-overall">
+                                        <label>Overall</label>
+                                        <input type="text" id="score_o" value="530" oninput="onFormChange()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. QR CODE & KUSTOMISASI TAMPILAN -->
+                            <div class="studio-card">
+                                <div class="card-heading">
+                                    <div class="card-title">3. QR Code & Kustomisasi Tampilan</div>
+                                    <span id="qr_active_badge" style="font-size: 10px; font-weight: 700; color: var(--primary);">Pilihan: S1</span>
+                                </div>
+
+                                <div class="preset-row">
+                                    <div id="btn_qr_s1" class="preset-pill active" onclick="setQRPreset('s1')">
+                                        <div class="preset-pill-title">🎓 S1</div>
+                                    </div>
+                                    <div id="btn_qr_pasca" class="preset-pill" onclick="setQRPreset('pasca')">
+                                        <div class="preset-pill-title">🏛️ Pasca</div>
+                                    </div>
+                                    <div id="btn_qr_umum" class="preset-pill" onclick="setQRPreset('umum')">
+                                        <div class="preset-pill-title">🌐 Umum</div>
+                                    </div>
+                                </div>
+
+                                <div class="upload-trigger" onclick="document.getElementById('custom_qr_input').click()">
+                                    📁 <b>Klik di Sini untuk Upload QR Kustom</b>
+                                    <input type="file" id="custom_qr_input" accept="image/*" style="display:none;" onchange="onCustomQRUpload(this)">
+                                </div>
+
+                                <div style="margin-top: 8px;">
+                                    <div class="toggle-switch-row">
+                                        <div class="toggle-meta">
+                                            <h4>Logo Validation (Kotak 2)</h4>
+                                            <p>Sembunyikan/tampilkan logo diamond</p>
+                                        </div>
+                                        <label class="switch-control">
+                                            <input type="checkbox" id="toggle_val_logo" checked onchange="onToggleValidation(this)">
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <div class="toggle-switch-row">
+                                        <div class="toggle-meta">
+                                            <h4>Stempel Cap (Kotak 3)</h4>
+                                            <p>Sembunyikan/tampilkan stempel cap resmi</p>
+                                        </div>
+                                        <label class="switch-control">
+                                            <input type="checkbox" id="toggle_cap_ttd" checked onchange="onToggleCap(this)">
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ACTION BUTTON -->
+                            <div class="actions-group">
+                                <button type="button" class="btn-action-primary" onclick="generateDocument('docx')">
+                                    ⚡ GENERATE & DOWNLOAD WORD (.DOCX)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Authentic Paper Mockup (EXACT AS SCREENSHOT) -->
+                        <div class="preview-side">
+                            <div class="preview-top-badge">LIVE PREVIEW DOKUMEN</div>
+                            <div class="certificate-sheet" id="cert_canvas">
+                                <!-- Watermark Background Emblem (image1.png) -->
+                                <img src="/static/assets/image1.png" class="watermark-emblem" alt="Watermark Emblem" onerror="this.style.display='none'">
+
+                                <div class="certificate-inner">
+                                    <!-- 1. Header (Logo + Titles) -->
+                                    <div class="doc-header">
+                                        <img src="/static/assets/unsil_logo.png" class="doc-logo" alt="Logo UNSIL" onerror="this.src='/static/assets/image2.png'">
+                                        <div class="doc-titles">
+                                            <div class="doc-inst">SILIWANGI UNIVERSITY LANGUAGE CENTRE</div>
+                                            <div class="doc-subinst">Text of English Language Proficiency (TELP)</div>
+                                            <div class="doc-name">TEST REPORT FORM</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. Meta Details -->
+                                    <table class="doc-table-meta">
+                                        <tr>
+                                            <td class="lbl">Certificate Number</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_cert_no">135512SULCUN58038GA</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Test Date</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_tgl_tes">19/12/2025</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Valid Until</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_tgl_exp">19/12/2027</td>
+                                        </tr>
+                                    </table>
+
+                                    <hr class="doc-hr">
+                                    <div class="doc-notice">
+                                        Test of English Language Proficiency (TELP) is administered by Siliwangi University Language Centre
+                                    </div>
+                                    <hr class="doc-hr">
+
+                                    <!-- 3. Candidate's Details -->
+                                    <div class="doc-section-title">CANDIDATES DETAILS</div>
+                                    <table class="doc-table-data">
+                                        <tr>
+                                            <td class="lbl">Name</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_nama">GAYA NAYLA HUMAIRA HERDIAWAN</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Date of Birth</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_tgl_lahir">04/01/2009</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Native Country</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_negara">Indonesia</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Native Language</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_bahasa">Indonesian</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Sex</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_gender">F</td>
+                                        </tr>
+                                    </table>
+
+                                    <hr class="doc-hr">
+
+                                    <!-- 4. Test Results -->
+                                    <div class="doc-section-title">TEST RESULTS</div>
+                                    <table class="doc-table-results">
+                                        <tr>
+                                            <td class="lbl">Listening Comprehension</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_score_l">56</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Structure & Written Expression</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_score_s">53</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Reading Comprehension</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_score_r">50</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="lbl">Overall Band Score</td>
+                                            <td class="col">:</td>
+                                            <td class="val" id="prev_score_o">530</td>
+                                        </tr>
+                                    </table>
+
+                                    <hr class="doc-hr">
+
+                                    <!-- 5. Bottom 3 Bordered Boxes -->
+                                    <div class="doc-boxes-footer">
+                                        <!-- Box 1: Security Guard (QR Code) -->
+                                        <div class="doc-box">
+                                            <div class="doc-box-title">Security Guard</div>
+                                            <div class="doc-box-content">
+                                                <img id="prev_qr_img" src="/static/assets/qr_s1.png" style="width: 52px; height: 52px;" alt="QR Code" onerror="this.src='/static/assets/image5.jpeg'">
+                                            </div>
+                                        </div>
+
+                                        <!-- Box 2: Validation (Diamond Emblem) -->
+                                        <div class="doc-box" id="prev_box_val">
+                                            <div class="doc-box-title">Validation</div>
+                                            <div class="doc-box-content">
+                                                <img id="prev_val_logo" src="/static/assets/validation_logo.png" style="width: 48px; height: 48px;" alt="Validation Logo" onerror="this.src='/static/assets/image7.png'">
+                                            </div>
+                                        </div>
+
+                                        <!-- Box 3: Head of Language Centre -->
+                                        <div class="doc-box doc-box-signature" id="prev_box_sig">
+                                            <div class="doc-sig-title">
+                                                Head of<br>
+                                                Siliwangi University Language Centre
+                                            </div>
+                                            <div class="doc-sig-stage">
+                                                <img id="prev_stamp_img" class="stamp-image" src="/static/assets/cap_ttd.png" alt="Cap Stempel" onerror="this.src='/static/assets/image6.png'">
+                                                <img class="sig-image" src="/static/assets/image8.png" alt="Signature">
+                                            </div>
+                                            <div class="doc-signer-name">Dr. Soni Tantan Tandiana, S.Pd.</div>
+                                            <div class="doc-signer-nip">NIP 197009152021211004</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- MODULE 2: BULK EXCEL STUDIO (EXACT STUDIO SATUAN + PREV/NEXT + LIVE PREVIEW) -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-bulk-excel-content" class="sub-menu-view hidden">
+                    <!-- 1. UPLOAD DROPZONE ONLY (Clean, No extra top settings) -->
+                    <div class="dash-card" id="bulk-upload-card" style="max-width: 900px; margin: 0 auto;">
+                        <div class="dash-card-header flex-between">
+                            <div>
+                                <h3><i class="fa-solid fa-table" style="color:#0284c7; margin-right:8px;"></i> Bulk Excel Studio — Cetak Massal Sertifikat</h3>
+                                <p style="font-size:11px; color:#64748b; margin:0;">Unggah file Excel peserta (.xlsx) untuk memuat data ke Studio Editor & generate paket sertifikat massal</p>
+                            </div>
+                        </div>
+                        <div class="dash-card-body">
+                            <input type="file" id="bulk-excel-file-input" accept=".xlsx, .xls" style="display:none;" onchange="handleBulkExcelUpload(this)">
+                            
+                            <div class="dropzone-modern" onclick="document.getElementById('bulk-excel-file-input').click()">
+                                <div class="dropzone-icon-glow"><i class="fa-solid fa-file-arrow-up"></i></div>
+                                <h3>Pilih / Tarik File Excel Peserta (.xlsx)</h3>
+                                <p>Klik di sini untuk memilih file Excel dari komputer</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. INTERACTIVE BULK STUDIO WORKSPACE (Shown after Excel is parsed) -->
+                    <div id="bulk-workspace" class="hidden">
+                        <!-- Top Toolbar with View Switcher -->
+                        <div class="dash-card mb-3" style="padding: 12px 18px; max-width: 1240px; margin: 0 auto 16px auto;">
+                            <div class="flex-between" style="flex-wrap: wrap; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-size: 13.5px; font-weight: 800; color: #1e293b;">
+                                        <i class="fa-solid fa-file-excel" style="color: #16a34a; margin-right: 6px;"></i>
+                                        <span id="bulk-loaded-filename">Data_Peserta.xlsx</span>
+                                    </span>
+                                    <span class="badge" style="background: rgba(2,132,199,0.15); color: #0284c7; font-weight: 800; padding: 4px 12px; border-radius: 6px; font-size: 12px;">
+                                        Total: <span id="bulk-total-badge">0</span> Peserta
+                                    </span>
+                                </div>
+
+                                <!-- 2-View Switcher Tabs -->
+                                <div style="display: flex; background: #e2e8f0; padding: 3px; border-radius: 8px; gap: 4px;">
+                                    <button type="button" class="btn btn-sm" id="btn-bulk-tab-list" onclick="switchBulkTab('list')" style="background: #ffffff; color: #0284c7; font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                        <i class="fa-solid fa-list-check"></i> 1. Tampilan List Data
+                                    </button>
+                                    <button type="button" class="btn btn-sm" id="btn-bulk-tab-studio" onclick="switchBulkTab('studio')" style="background: transparent; color: #64748b; font-weight: 700;">
+                                        <i class="fa-solid fa-bolt"></i> 2. Tampilan Studio Editor
+                                    </button>
+                                </div>
+
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="resetBulkExcel()">
+                                        <i class="fa-solid fa-arrow-rotate-left"></i> Ganti File Excel
+                                    </button>
+                                    <button type="button" class="btn btn-gold btn-sm" onclick="generateAllBulkZip()">
+                                        <i class="fa-solid fa-file-zipper"></i> <strong>GENERATE SEMUA (.ZIP)</strong>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- VIEW 1: TAMPILAN LIST (TABEL DAFTAR PESERTA - PILIHAN AWAL SETELAH UPLOAD) -->
+                        <div id="bulk-view-list" class="dash-card" style="max-width: 1240px; margin: 0 auto;">
+                            <div class="dash-card-header flex-between">
+                                <div>
+                                    <h3><i class="fa-solid fa-table-list" style="color: #0284c7; margin-right: 6px;"></i> Daftar Seluruh Peserta Dalam File Excel</h3>
+                                    <p style="font-size: 11px; color: #64748b; margin: 0;">Klik tombol <strong>Edit di Studio</strong> untuk membuka data peserta di Studio Editor & Live Mockup</p>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="switchBulkTab('studio')">
+                                    <i class="fa-solid fa-pen-to-square"></i> Buka Tampilan Studio <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+                                </button>
+                            </div>
+                            <div class="dash-card-body" style="max-height: 520px; overflow-y: auto;">
+                                <table class="table-dash">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">No</th>
+                                            <th>No Sertifikat</th>
+                                            <th>Nama Peserta</th>
+                                            <th>Tgl Lahir</th>
+                                            <th>Tgl Tes</th>
+                                            <th style="text-align: center;">L</th>
+                                            <th style="text-align: center;">S</th>
+                                            <th style="text-align: center;">R</th>
+                                            <th style="text-align: center;">Overall</th>
+                                            <th style="text-align: right;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bulk-table-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- VIEW 2: TAMPILAN STUDIO (SAMA PERSIS SEPERTI STUDIO SATUAN + TOMBOL NEXT/PREV) -->
+                        <div id="bulk-view-studio" class="hidden">
+                            <div class="studio-container">
+                                <!-- LEFT: Form Controls Panel -->
+                                <div class="form-side">
+                                    <!-- 1. IDENTITAS & DATA PESERTA -->
+                                    <div class="studio-card">
+                                        <div class="card-heading">
+                                            <div class="card-title">1. Nomor Sertifikat & Data Peserta</div>
+                                            <!-- Tombol Mundur & Maju Navigasi Peserta -->
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <button type="button" class="btn-pill" id="btn-bulk-prev" onclick="prevBulkRecord()" title="Peserta Sebelumnya">
+                                                    <i class="fa-solid fa-chevron-left"></i> Prev
+                                                </button>
+                                                <span class="badge-tag badge-auto" id="bulk-page-indicator" style="font-size: 11px; padding: 3px 8px;">1 / 10</span>
+                                                <button type="button" class="btn-pill" id="btn-bulk-next" onclick="nextBulkRecord()" title="Peserta Selanjutnya">
+                                                    Next <i class="fa-solid fa-chevron-right"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="cert-number-banner">
+                                            <span class="cert-label">Nomor Sertifikat Akhir:</span>
+                                            <span id="bulk_live_cert_code" class="cert-code">135512SULCUN58001BU</span>
+                                        </div>
+
+                                        <div class="grid-2" style="margin-bottom: 8px;">
+                                            <div class="form-field">
+                                                <label>No Kode</label>
+                                                <input type="text" id="bulk-edit-kd-doc" value="135512" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Kode Lembaga <span class="badge-tag badge-locked">Terkunci</span></label>
+                                                <input type="text" id="bulk-edit-kd-lem" value="SULCUN58" readonly class="input-locked">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid-2" style="margin-bottom: 8px;">
+                                            <div class="form-field">
+                                                <label>No Urut (3 Digit)</label>
+                                                <input type="text" id="bulk-edit-no-urut" value="001" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Inisial <span class="badge-tag badge-locked">Auto</span></label>
+                                                <input type="text" id="bulk-edit-inisial" value="BU" readonly class="input-locked">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-field" style="margin-bottom: 8px;">
+                                            <label>Nama Lengkap Peserta <span class="badge-tag badge-auto">Auto Capslock</span></label>
+                                            <input type="text" id="bulk-edit-nama" class="input-caps" oninput="onBulkFormChange()">
+                                        </div>
+
+                                        <div class="grid-2" style="margin-bottom: 8px;">
+                                            <div class="form-field">
+                                                <label>📅 Tanggal Lahir (DD/MM/YYYY)</label>
+                                                <input type="text" id="bulk-edit-tgl-lahir" placeholder="04/01/2009" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Sex</label>
+                                                <select id="bulk-edit-gender" onchange="onBulkFormChange()">
+                                                    <option value="F (Female)">F (Female)</option>
+                                                    <option value="M (Male)">M (Male)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid-2">
+                                            <div class="form-field">
+                                                <label>Native Country</label>
+                                                <input type="text" id="bulk-edit-negara" value="Indonesia" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Native Language</label>
+                                                <input type="text" id="bulk-edit-bahasa" value="Indonesian" oninput="onBulkFormChange()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. TANGGAL TES & NILAI SKOR -->
+                                    <div class="studio-card">
+                                        <div class="card-heading">
+                                            <div class="card-title">2. Tanggal Tes & Nilai Skor</div>
+                                        </div>
+
+                                        <div class="grid-2" style="margin-bottom: 8px;">
+                                            <div class="form-field">
+                                                <label>📅 Tanggal Tes (DD/MM/YYYY)</label>
+                                                <input type="text" id="bulk-edit-tgl-tes" placeholder="19/12/2025" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="form-field">
+                                                <label>Valid Until <span class="badge-tag badge-auto">+2 Tahun</span></label>
+                                                <input type="text" id="bulk-edit-tgl-exp" class="input-highlight" placeholder="19/12/2027" oninput="onBulkFormChange()">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid-4">
+                                            <div class="score-card">
+                                                <label>Listening</label>
+                                                <input type="text" id="bulk-edit-score-l" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="score-card">
+                                                <label>Structure</label>
+                                                <input type="text" id="bulk-edit-score-s" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="score-card">
+                                                <label>Reading</label>
+                                                <input type="text" id="bulk-edit-score-r" oninput="onBulkFormChange()">
+                                            </div>
+                                            <div class="score-card score-overall">
+                                                <label>Overall</label>
+                                                <input type="text" id="bulk-edit-score-o" oninput="onBulkFormChange()">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3. QR CODE & KUSTOMISASI TAMPILAN -->
+                                    <div class="studio-card">
+                                        <div class="card-heading">
+                                            <div class="card-title">3. QR Code & Kustomisasi Tampilan</div>
+                                            <span id="bulk_qr_active_badge" style="font-size: 10px; font-weight: 700; color: var(--primary);">Pilihan: S1</span>
+                                        </div>
+
+                                        <div class="preset-row">
+                                            <div id="bulk_btn_qr_s1" class="preset-pill active" onclick="setBulkQRPreset('s1')">
+                                                <div class="preset-pill-title">🎓 S1</div>
+                                            </div>
+                                            <div id="bulk_btn_qr_pasca" class="preset-pill" onclick="setBulkQRPreset('pasca')">
+                                                <div class="preset-pill-title">🏛️ Pasca</div>
+                                            </div>
+                                            <div id="bulk_btn_qr_umum" class="preset-pill" onclick="setBulkQRPreset('umum')">
+                                                <div class="preset-pill-title">🌐 Umum</div>
+                                            </div>
+                                        </div>
+
+                                        <div style="margin-top: 8px;">
+                                            <div class="toggle-switch-row">
+                                                <div class="toggle-meta">
+                                                    <h4>Logo Validation (Kotak 2)</h4>
+                                                    <p>Sembunyikan/tampilkan logo diamond</p>
+                                                </div>
+                                                <label class="switch-control">
+                                                    <input type="checkbox" id="bulk-edit-val" checked onchange="onBulkFormChange()">
+                                                    <span class="switch-slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <div class="toggle-switch-row">
+                                                <div class="toggle-meta">
+                                                    <h4>Stempel Cap (Kotak 3)</h4>
+                                                    <p>Sembunyikan/tampilkan stempel cap resmi</p>
+                                                </div>
+                                                <label class="switch-control">
+                                                    <input type="checkbox" id="bulk-edit-cap" checked onchange="onBulkFormChange()">
+                                                    <span class="switch-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ACTION BUTTONS -->
+                                    <div class="actions-group" style="display: flex; gap: 10px;">
+                                        <button type="button" class="btn-action-primary" style="flex: 1;" onclick="downloadCurrentBulkDocx()">
+                                            ⚡ GENERATE & DOWNLOAD WORD (.DOCX)
+                                        </button>
+                                        <button type="button" class="btn btn-gold" style="padding: 12px 20px; font-weight: 800;" onclick="generateAllBulkZip()">
+                                            📦 GENERATE SEMUA (.ZIP)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- RIGHT: Authentic Paper Mockup (EXACT AS STUDIO SATUAN) -->
+                                <div class="preview-side">
+                                    <div class="preview-top-badge">LIVE PREVIEW DOKUMEN (BARIS TERPILIH)</div>
+                                    <div class="certificate-sheet" id="bulk_cert_canvas">
+                                        <!-- Watermark Background Emblem -->
+                                        <img src="/static/assets/image1.png" class="watermark-emblem" alt="Watermark Emblem" onerror="this.style.display='none'">
+
+                                        <div class="certificate-inner">
+                                            <!-- 1. Header (Logo + Titles) -->
+                                            <div class="doc-header">
+                                                <img src="/static/assets/unsil_logo.png" class="doc-logo" alt="Logo UNSIL" onerror="this.src='/static/assets/image2.png'">
+                                                <div class="doc-titles">
+                                                    <div class="doc-inst">SILIWANGI UNIVERSITY LANGUAGE CENTRE</div>
+                                                    <div class="doc-subinst">Text of English Language Proficiency (TELP)</div>
+                                                    <div class="doc-name">TEST REPORT FORM</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 2. Meta Details -->
+                                            <table class="doc-table-meta">
+                                                <tr>
+                                                    <td class="lbl">Certificate Number</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_cert_no">135512SULCUN58001BU</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Test Date</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_tgl_tes">19/12/2025</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Valid Until</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_tgl_exp">19/12/2027</td>
+                                                </tr>
+                                            </table>
+
+                                            <hr class="doc-hr">
+                                            <div class="doc-notice">
+                                                Test of English Language Proficiency (TELP) is administered by Siliwangi University Language Centre
+                                            </div>
+                                            <hr class="doc-hr">
+
+                                            <!-- 3. Candidate's Details -->
+                                            <div class="doc-section-title">CANDIDATES DETAILS</div>
+                                            <table class="doc-table-data">
+                                                <tr>
+                                                    <td class="lbl">Name</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_nama">BUDI SANTOSO</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Date of Birth</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_tgl_lahir">04/01/2009</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Native Country</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_negara">Indonesia</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Native Language</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_bahasa">Indonesian</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Sex</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_gender">M</td>
+                                                </tr>
+                                            </table>
+
+                                            <hr class="doc-hr">
+
+                                            <!-- 4. Test Results -->
+                                            <div class="doc-section-title">TEST RESULTS</div>
+                                            <table class="doc-table-results">
+                                                <tr>
+                                                    <td class="lbl">Listening Comprehension</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_score_l">56</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Structure & Written Expression</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_score_s">53</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Reading Comprehension</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_score_r">50</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lbl">Overall Band Score</td>
+                                                    <td class="col">:</td>
+                                                    <td class="val" id="bulk_prev_score_o">530</td>
+                                                </tr>
+                                            </table>
+
+                                            <hr class="doc-hr">
+
+                                            <!-- 5. Bottom 3 Bordered Boxes -->
+                                            <div class="doc-boxes-footer">
+                                                <!-- Box 1: Security Guard (QR Code) -->
+                                                <div class="doc-box">
+                                                    <div class="doc-box-title">Security Guard</div>
+                                                    <div class="doc-box-content">
+                                                        <img id="bulk_prev_qr_img" src="/static/assets/qr_s1.png" style="width: 52px; height: 52px;" alt="QR Code" onerror="this.src='/static/assets/image5.jpeg'">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Box 2: Validation (Diamond Emblem) -->
+                                                <div class="doc-box" id="bulk_prev_box_val">
+                                                    <div class="doc-box-title">Validation</div>
+                                                    <div class="doc-box-content">
+                                                        <img id="bulk_prev_val_logo" src="/static/assets/validation_logo.png" style="width: 48px; height: 48px;" alt="Validation Logo" onerror="this.src='/static/assets/image7.png'">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Box 3: Head of Language Centre -->
+                                                <div class="doc-box doc-box-signature" id="bulk_prev_box_sig">
+                                                    <div class="doc-sig-title">
+                                                        Head of<br>
+                                                        Siliwangi University Language Centre
+                                                    </div>
+                                                    <div class="doc-sig-stage">
+                                                        <img id="bulk_prev_stamp_img" class="stamp-image" src="/static/assets/cap_ttd.png" alt="Cap Stempel" onerror="this.src='/static/assets/image6.png'">
+                                                        <img class="sig-image" src="/static/assets/image8.png" alt="Signature">
+                                                    </div>
+                                                    <div class="doc-signer-name">Dr. Soni Tantan Tandiana, S.Pd.</div>
+                                                    <div class="doc-signer-nip">NIP 197009152021211004</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- MODULE 3: RIWAYAT & CARI (DB) -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-cert-hist-content" class="sub-menu-view hidden">
+                    <div class="dash-card">
+                        <div class="dash-card-header flex-between">
+                            <h3>Riwayat & Cari Sertifikat (DB)</h3>
+                            <input type="text" id="search-cert-input" class="form-control" style="width:240px;" placeholder="Cari nama / no sertifikat..." oninput="loadCertHistoryData()">
+                        </div>
+                        <div class="dash-card-body">
+                            <table class="table-dash">
+                                <thead>
+                                    <tr><th>No Sertifikat</th><th>Nama Peserta</th><th>Tanggal Tes</th><th>Overall Score</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody id="cert-history-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- MODULE 4: BAPU TELP ONLINE -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-bapu-content" class="sub-menu-view hidden">
+                    <section class="dash-card upload-dash-card" id="upload-section">
+                        <div class="dash-card-header">
+                            <h3>Upload Data Kehadiran Excel (.xlsx)</h3>
+                        </div>
+                        <div class="dropzone-modern" id="dropzone">
+                            <input type="file" id="excel-file-input" accept=".xlsx, .xls" hidden>
+                            <div class="dropzone-inner">
+                                <div class="dropzone-icon-glow"><i class="fa-solid fa-file-excel"></i></div>
+                                <h3>Tarik & Lepas File Excel Di Sini</h3>
+                                <p>atau <button type="button" class="btn-link">Pilih file dari komputer</button></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div id="workspace" class="workspace-area hidden">
+                        <div class="dash-stats-row mb-3" style="display:flex; gap:12px;">
+                            <div class="dash-card" style="flex:1; padding:12px; text-align:center;">
+                                <span style="font-size:11px; color:#64748b;">Total Peserta</span>
+                                <h3 id="stat-total" style="font-size:20px; font-weight:800; color:#0284c7;">0</h3>
+                            </div>
+                            <div class="dash-card" style="flex:1; padding:12px; text-align:center;">
+                                <span style="font-size:11px; color:#64748b;">Hadir (YA)</span>
+                                <h3 id="stat-hadir" style="font-size:20px; font-weight:800; color:#16a34a;">0</h3>
+                            </div>
+                            <div class="dash-card" style="flex:1; padding:12px; text-align:center;">
+                                <span style="font-size:11px; color:#64748b;">Tidak Hadir</span>
+                                <h3 id="stat-absent" style="font-size:20px; font-weight:800; color:#dc2626;">0</h3>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="dash-card">
+                                <div class="dash-card-header"><h3>Parameter Ujian BAPU</h3></div>
+                                <div class="dash-card-body">
+                                    <div class="grid-2">
+                                        <div class="form-field"><label>Hari</label><input type="text" id="input-hari"></div>
+                                        <div class="form-field"><label>Tanggal</label><input type="text" id="input-tanggal"></div>
+                                        <div class="form-field"><label>Waktu</label><input type="text" id="input-waktu"></div>
+                                        <div class="form-field"><label>Ruangan</label><input type="text" id="input-ruangan"></div>
+                                    </div>
+                                    <div class="form-field mt-2"><label>Nama Pengawas</label><input type="text" id="input-pengawas"></div>
+                                    <div class="form-field mt-2"><label>Catatan</label><textarea id="input-catatan" rows="2" class="form-control"></textarea></div>
+                                    <div style="display:flex; gap:8px; margin-top:12px;">
+                                        <button type="button" class="btn btn-primary" onclick="downloadDocument('berita_acara')">Berita Acara</button>
+                                        <button type="button" class="btn btn-primary" onclick="downloadDocument('daftar_hadir')">Daftar Hadir (28 Baris)</button>
+                                        <button type="button" class="btn btn-gold" onclick="downloadDocument('paket_lengkap')">Paket Lengkap DOCX</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dash-card">
+                                <div class="dash-card-header flex-between">
+                                    <h3>Daftar Peserta & Kelola Kehadiran</h3>
+                                    <div style="display:flex; gap:6px;">
+                                        <input type="text" id="search-input" class="form-control" style="width:140px;" placeholder="Cari nama/npm...">
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="openAddStudentModal()">+ Tambah</button>
+                                    </div>
+                                </div>
+                                <div class="dash-card-body" style="max-height:360px; overflow-y:auto;">
+                                    <table class="table-dash">
+                                        <thead><tr><th>No</th><th>Nama</th><th>NPM</th><th>Status Presensi</th><th>Aksi</th></tr></thead>
+                                        <tbody id="students-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- MODULE 5: LAPORAN HARIAN (DENGAN KUNCI MINGGU/LIBUR & INDIKATOR HIJAU) -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-laporan-content" class="sub-menu-view hidden">
+                    <div class="dash-card">
+                        <div class="dash-card-header flex-between">
+                            <div>
+                                <h3>Jurnal Laporan Harian Bulanan</h3>
+                                <p style="font-size:11px; color:#64748b; margin:0;">Template Resmi Kementerian (KOP & Tabel 4 Kolom) — Minggu & Libur Nasional Terkunci</p>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <select id="select-month" class="form-control" onchange="loadLaporanHarianMonth()" style="width:120px;">
+                                    <option value="1">Januari</option>
+                                    <option value="2">Februari</option>
+                                    <option value="3">Maret</option>
+                                    <option value="4">April</option>
+                                    <option value="5">Mei</option>
+                                    <option value="6">Juni</option>
+                                    <option value="7">Juli</option>
+                                    <option value="8" selected>Agustus</option>
+                                    <option value="9">September</option>
+                                    <option value="10">Oktober</option>
+                                    <option value="11">November</option>
+                                    <option value="12">Desember</option>
+                                </select>
+                                <input type="number" id="select-year" class="form-control" value="2026" style="width:80px;" onchange="loadLaporanHarianMonth()">
+                                <button type="button" class="btn btn-gold" onclick="exportLaporanHarianDocx()">
+                                    <i class="fa-solid fa-file-word"></i> EKSPOR LAPORAN (.docx)
+                                </button>
+                            </div>
+                        </div>
+                        <div class="dash-card-body">
+                            <div class="days-grid-dashboard" id="days-grid-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- MODULE 6: DIRECTORY & WA CETAK / GOOGLE DRIVE -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-dir-wa-content" class="sub-menu-view hidden">
+                    <div class="dash-card">
+                        <div class="dash-card-header"><h3>Pengaturan Directory & WhatsApp Cetak</h3></div>
+                        <div class="dash-card-body">
+                            <div class="form-field mb-2"><label>Output Directory</label><input type="text" value="C:\Users\UPA BAHASA\Downloads\bapu\output" class="form-control"></div>
+                            <div class="form-field mb-2"><label>Nomor WhatsApp Pengawas</label><input type="text" placeholder="628123456789" class="form-control"></div>
+                            <button type="button" class="btn btn-primary mt-2">Simpan Pengaturan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sub-menu-gdrive-content" class="sub-menu-view hidden">
+                    <div class="dash-card">
+                        <div class="dash-card-header"><h3>Integrasi Google Drive Cloud</h3></div>
+                        <div class="dash-card-body">
+                            <div class="form-field mb-2"><label>Google Apps Script Web App URL</label><input type="text" placeholder="https://script.google.com/macros/s/.../exec" class="form-control"></div>
+                            <div class="form-field mb-2"><label>Target Folder ID</label><input type="text" placeholder="1A2B3C4D5E..." class="form-control"></div>
+                            <button type="button" class="btn btn-primary mt-2">Simpan Google Drive</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====================================================== -->
+                <!-- MODULE 7: DOKUMENTASI API & GATEWAY -->
+                <!-- ====================================================== -->
+                <div id="sub-menu-api-docs-content" class="sub-menu-view hidden">
+                    <div class="dash-card">
+                        <div class="dash-card-header"><h3>Dokumentasi API & GitHub Pages Gateway</h3></div>
+                        <div class="dash-card-body">
+                            <div style="background:#0f172a; color:#f8fafc; padding:20px; border-radius:8px; font-family:monospace; font-size:12px;">
+                                <h4 style="color:#38bdf8;">1. Gateway Resolver (GitHub Pages / Flutter):</h4>
+                                <pre style="color:#4ade80;">GET /api/v1/config.json</pre>
+                                <h4 style="color:#38bdf8; margin-top:14px;">2. Endpoint Mobile Auth:</h4>
+                                <pre style="color:#4ade80;">POST /api/v1/auth/login</pre>
+                                <h4 style="color:#38bdf8; margin-top:14px;">3. Endpoint Generator Sertifikat:</h4>
+                                <pre style="color:#4ade80;">POST /api/v1/certificates/generate</pre>
+                                <h4 style="color:#38bdf8; margin-top:14px;">4. Endpoint Bulk Excel Upload:</h4>
+                                <pre style="color:#4ade80;">POST /api/v1/certificates/bulk-upload</pre>
+                                <h4 style="color:#38bdf8; margin-top:14px;">5. Endpoint Ekspor Word Laporan Harian:</h4>
+                                <pre style="color:#4ade80;">GET /api/v1/laporan-harian/export-docx?year=2026&month=8</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH PESERTA (BAPU) -->
+    <div class="modal-backdrop hidden" id="modal-add-student">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> Tambah Peserta Ujian</h3>
+                <button type="button" class="btn-close" onclick="closeAddStudentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-field mb-2">
+                    <label>Nama Lengkap Peserta</label>
+                    <input type="text" id="add-student-nama" class="form-control input-caps" placeholder="Contoh: AHMAD FAUZI">
+                </div>
+                <div class="form-field mb-2">
+                    <label>Nomor Pokok Mahasiswa (NPM)</label>
+                    <input type="text" id="add-student-npm" class="form-control" placeholder="Contoh: 222103082">
+                </div>
+                <div class="form-field mb-2">
+                    <label>Status Kehadiran</label>
+                    <select id="add-student-hadir" class="form-control">
+                        <option value="YA" selected>HADIR (YA)</option>
+                        <option value="TIDAK">TIDAK HADIR</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddStudentModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewStudent()">Tambahkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT DAY (LAPORAN HARIAN) -->
+    <div class="modal-backdrop hidden" id="modal-day-edit">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-day"></i> Kelola Foto & Catatan - <span id="modal-day-title">27 Agustus 2026</span></h3>
+                <button type="button" class="btn-close" onclick="closeDayModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-day-num">
+                <div class="grid-2">
+                    <div>
+                        <label>Foto Kegiatan (WebP Compressed)</label>
+                        <div style="border:1px solid #e2e8f0; padding:10px; text-align:center; border-radius:6px;">
+                            <img id="modal-day-photo-img" src="/static/assets/placeholder.jpg" style="max-width:100%; height:160px; object-fit:cover;">
+                        </div>
+                        <input type="file" id="modal-photo-file-input" accept="image/*" hidden onchange="uploadDayPhotoSelected()">
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="document.getElementById('modal-photo-file-input').click()">
+                            <i class="fa-solid fa-upload"></i> Unggah / Ganti Foto
+                        </button>
+                    </div>
+                    <div>
+                        <label>Catatan Kegiatan</label>
+                        <textarea id="modal-day-activity" class="form-control" rows="4"></textarea>
+                        <div style="margin-top:8px;">
+                            <label><input type="checkbox" id="check-sabtu-masuk"> Sabtu Masuk Kerja</label><br>
+                            <label><input type="checkbox" id="check-extra-libur"> Cuti Bersama / Extra Libur</label>
+                        </div>
+                        <input type="text" id="modal-day-holiday-reason" class="form-control mt-2" placeholder="Alasan libur...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDayModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveDayDetails()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="toast-container">
+        <div id="toast" class="toast hidden">
+            <div class="toast-body" id="toast-message">Notifikasi</div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
