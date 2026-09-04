@@ -9,26 +9,50 @@ import db
 import laporan_engine
 import cert_engine
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
-CORS(app)
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64 MB limit
-
-# Initialize DB on startup
-db.init_db()
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IS_VERCEL = bool(os.environ.get('VERCEL'))
 OUTPUT_DIR = '/tmp/output' if IS_VERCEL else os.path.join(BASE_DIR, 'output')
 UPLOAD_PHOTO_DIR = '/tmp/uploads/photos' if IS_VERCEL else os.path.join(BASE_DIR, 'static', 'uploads', 'photos')
 LOGO_PATH = os.path.join(BASE_DIR, 'static', 'assets', 'logo_unsil.png')
 
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, 'templates'),
+    static_folder=os.path.join(BASE_DIR, 'static')
+)
+CORS(app)
+app.config['MAX_CONTENT_LENGTH'] = 64 * 1024 * 1024  # 64 MB limit
+
+# Initialize DB on startup
+try:
+    db.init_db()
+except Exception as e:
+    print(f"DB init warning: {e}")
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(UPLOAD_PHOTO_DIR, exist_ok=True)
 
+@app.route('/health')
+@app.route('/ping')
+def health_check():
+    return jsonify({
+        'status': 'online',
+        'message': 'Portal Terpadu UPA Bahasa Flask Microservice Active',
+        'platform': 'Vercel Serverless' if IS_VERCEL else 'Standard'
+    })
+
 @app.route('/')
 @app.route('/login')
+@app.route('/api/index')
 def index():
-    return render_template('index.html')
+    template_file = os.path.join(BASE_DIR, 'templates', 'index.html')
+    if os.path.exists(template_file):
+        return render_template('index.html')
+    return jsonify({
+        'status': 'online',
+        'message': 'Portal Terpadu UPA Bahasa Flask Engine Active',
+        'app': 'Flask Engine'
+    })
 
 # ==========================================
 # FLUTTER MOBILE & REST API GATEWAY (v1)
