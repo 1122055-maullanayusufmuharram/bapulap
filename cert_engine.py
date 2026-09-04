@@ -348,8 +348,17 @@ def generate_certificate_full(
             gdrive_filename = f"{safe_nama_gd}-{kode_awal_gd}.pdf"
             
             gdrive_upload = upload_to_gdrive(pdf_resmi_path, gdrive_url, folder_id, custom_filename=gdrive_filename)
+        elif docx_resmi_path and os.path.exists(docx_resmi_path):
+            safe_nama_gd = re.sub(r'[\/\\:*?"<>|]', '', str(data.get('nama', 'PESERTA'))).strip().upper()
+            safe_cert_no_gd = str(data.get('no_sertifikat', 'CERT')).replace('/', '_').replace('\\', '_').strip()
+            kode_awal_gd = re.split(r'[A-Za-z]', safe_cert_no_gd)[0] if re.search(r'[A-Za-z]', safe_cert_no_gd) else safe_cert_no_gd
+            if not kode_awal_gd:
+                kode_awal_gd = safe_cert_no_gd
+            gdrive_filename = f"{safe_nama_gd}-{kode_awal_gd}.docx"
+            
+            gdrive_upload = upload_to_gdrive(docx_resmi_path, gdrive_url, folder_id, custom_filename=gdrive_filename)
         else:
-            gdrive_upload = {'success': False, 'error': 'PDF Resmi tidak ditemukan untuk diunggah.'}
+            gdrive_upload = {'success': False, 'error': 'Berkas dokumen tidak ditemukan untuk diunggah.'}
 
     # Copy to configured custom directory with structured folders:
     # output_dir / QR_TYPE / TANGGAL / [NAMA-NO_SERTIFIKAT] / [NAMA-KODE_AWAL].docx + [NAMA-KODE_AWAL].pdf
