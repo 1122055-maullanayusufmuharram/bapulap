@@ -28,6 +28,51 @@ def get_transparent_png_bytes() -> bytes:
     img.save(buf, format="PNG")
     return buf.getvalue()
 
+def convert_docx_to_pdf(docx_path: str, pdf_path: str) -> str:
+    """
+    Converts a DOCX file to PDF using Microsoft Word COM automation (Windows only).
+    Returns the output PDF path on success, raises an exception on failure.
+    """
+    import sys
+    if sys.platform != 'win32':
+        raise RuntimeError("convert_docx_to_pdf requires Windows with MS Word installed")
+
+    import win32com.client
+    import pythoncom
+
+    pythoncom.CoInitialize()
+    word = None
+    doc = None
+    try:
+        word = win32com.client.Dispatch('Word.Application')
+        word.Visible = False
+        word.DisplayAlerts = False
+
+        abs_docx = os.path.abspath(docx_path)
+        abs_pdf = os.path.abspath(pdf_path)
+
+        doc = word.Documents.Open(abs_docx)
+        # wdFormatPDF = 17
+        doc.SaveAs2(abs_pdf, FileFormat=17)
+        doc.Close(False)
+        doc = None
+
+        return abs_pdf
+    except Exception as e:
+        raise RuntimeError(f"Word COM conversion failed: {e}")
+    finally:
+        if doc:
+            try:
+                doc.Close(False)
+            except Exception:
+                pass
+        if word:
+            try:
+                word.Quit()
+            except Exception:
+                pass
+        pythoncom.CoUninitialize()
+
 def calculate_initials(nama: str) -> str:
     """
     Calculates 2-letter initials from first word of name (e.g. 'ASEP JALAM' -> 'AS', 'GAYA NAYLA' -> 'GA')
