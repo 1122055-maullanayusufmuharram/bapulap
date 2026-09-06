@@ -1017,3 +1017,36 @@ def generate_bulk_from_records(
         'gdrive_failed_count': gdrive_failed_count,
         'records': generated_records
     }
+
+def generate_pdf_polos_stream(data: dict) -> str:
+    """
+    Generates single plain certificate (without validation logo and without cap ttd)
+    and converts to PDF for instant printing.
+    """
+    safe_no = str(data.get("no_sertifikat", "sertifikat")).replace("/", "_").replace("\\", "_")
+    nama = str(data.get("nama", "PESERTA")).upper()
+    safe_nama = re.sub(r'\s+', '_', nama)[:20]
+
+    cert_data_polos = dict(data)
+    cert_data_polos['show_validation_logo'] = False
+    cert_data_polos['show_cap_ttd'] = False
+
+    docx_filename = f"SERTIFIKAT_{safe_no}_{safe_nama}_CETAK_POLOS.docx"
+    pdf_filename = f"SERTIFIKAT_{safe_no}_{safe_nama}_CETAK_POLOS.pdf"
+
+    docx_path = os.path.join(OUTPUT_DIR, docx_filename)
+    pdf_path = os.path.join(OUTPUT_DIR, pdf_filename)
+
+    # 1. Generate DOCX
+    generate_certificate_docx(cert_data_polos, output_filename=docx_path)
+
+    # 2. Convert to PDF
+    try:
+        convert_docx_to_pdf(docx_path, pdf_path)
+        if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 1000:
+            return pdf_path
+    except Exception as e:
+        print(f"generate_pdf_polos_stream Word conversion error: {e}")
+
+    return None
+
