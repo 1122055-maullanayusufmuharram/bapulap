@@ -308,6 +308,35 @@ def api_gdrive_settings():
             }
         })
 
+@app.route('/api/v1/signatory/settings', methods=['GET', 'POST'])
+def api_signatory_settings():
+    """Get or Save Signatory (Ketua UPA Bahasa & TTD) in SQLite Database"""
+    if request.method == 'POST':
+        payload = request.json or {}
+        if 'ketua_baru_nama' in payload:
+            db.save_app_setting('ketua_baru_nama', str(payload.get('ketua_baru_nama') or '').strip())
+        if 'ketua_baru_nip' in payload:
+            db.save_app_setting('ketua_baru_nip', str(payload.get('ketua_baru_nip') or '').strip())
+        if 'ketua_transisi_tanggal' in payload:
+            db.save_app_setting('ketua_transisi_tanggal', str(payload.get('ketua_transisi_tanggal') or '2026-10-01').strip())
+        if 'ketua_baru_ttd_path' in payload:
+            db.save_app_setting('ketua_baru_ttd_path', str(payload.get('ketua_baru_ttd_path') or '').strip())
+        return jsonify({'success': True, 'message': 'Pengaturan Pejabat Penandatangan berhasil disimpan!'})
+    else:
+        settings = db.get_all_app_settings()
+        return jsonify({
+            'success': True,
+            'data': {
+                'ketua_baru_nama': settings.get('ketua_baru_nama', ''),
+                'ketua_baru_nip': settings.get('ketua_baru_nip', ''),
+                'ketua_transisi_tanggal': settings.get('ketua_transisi_tanggal', '2026-10-01'),
+                'ketua_baru_ttd_path': settings.get('ketua_baru_ttd_path', ''),
+                'ketua_lama_nama': 'Dr. Soni Tantan Tandiana, S.Pd.',
+                'ketua_lama_nip': 'NIP 197009152021211004',
+                'ketua_lama_ttd_path': '/assets/image8.png'
+            }
+        })
+
 @app.route('/api/v1/gdrive/test', methods=['POST'])
 def api_test_gdrive_connection():
     """Test connection to Google Apps Script Web App for Cloud Drive sync"""
