@@ -150,7 +150,11 @@ def api_generate_certificate():
             'overall': overall,
             'qr_type': qr_type,
             'show_validation_logo': show_validation,
-            'show_cap_ttd': show_cap
+            'show_cap_ttd': show_cap,
+            'nama_pejabat': req_data.get('nama_pejabat'),
+            'nip_pejabat': req_data.get('nip_pejabat'),
+            'ttd_base64': req_data.get('ttd_base64'),
+            'ttd_path': req_data.get('ttd_path'),
         }
 
         gdrive_settings = req_data.get('gdrive_settings')
