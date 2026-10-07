@@ -87,6 +87,106 @@ def calculate_initials(nama: str) -> str:
         return (words[0] + "X").upper()
     return "GA"
 
+def normalize_date_to_ymd_py(date_str: str) -> str:
+    if not date_str:
+        return ""
+    date_str = str(date_str).strip()
+    m_ymd = re.match(r'^(\d{4})-(\d{1,2})-(\d{1,2})$', date_str)
+    if m_ymd:
+        return f"{int(m_ymd.group(1)):04d}-{int(m_ymd.group(2)):02d}-{int(m_ymd.group(3)):02d}"
+    m_dmy = re.match(r'^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$', date_str)
+    if m_dmy:
+        return f"{int(m_dmy.group(3)):04d}-{int(m_dmy.group(2)):02d}-{int(m_dmy.group(1)):02d}"
+    return ""
+
+def resolve_signatory_py(tgl_tes_str: str) -> dict:
+    default_sig = {
+        'nama': 'Dr. Soni Tantan Tandiana, S.Pd.',
+        'nip': 'NIP 197009152021211004',
+        'ttd_bytes': None,
+        'is_new': False
+    }
+    ymd = normalize_date_to_ymd_py(tgl_tes_str)
+    if not ymd:
+        ymd = datetime.now().strftime('%Y-%m-%d')
+
+    # 1. Query multi-period table
+    try:
+        import sqlite3
+        conn = sqlite3.connect(DATABASE_PATH)
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='signatory_periods'")
+        if cur.fetchone():
+            cur.execute("""
+                SELECT id, nama, nip, tanggal_mulai, tanggal_selesai, ttd_path 
+                FROM signatory_periods 
+                WHERE tanggal_mulai <= ? AND (tanggal_selesai IS NULL OR tanggal_selesai >= ?)
+                ORDER BY tanggal_mulai DESC LIMIT 1
+            """, (ymd, ymd))
+            row = cur.fetchone()
+            if not row:
+                # If before all, get earliest
+                cur.execute("SELECT id, nama, nip, tanggal_mulai, tanggal_selesai, ttd_path FROM signatory_periods ORDER BY tanggal_mulai ASC LIMIT 1")
+                first_r = cur.fetchone()
+                if first_r and ymd < first_r[3]:
+                    row = first_r
+                else:
+                    # If after all, get latest
+                    cur.execute("SELECT id, nama, nip, tanggal_mulai, tanggal_selesai, ttd_path FROM signatory_periods ORDER BY tanggal_mulai DESC LIMIT 1")
+                    row = cur.fetchone()
+
+            if row:
+                pid, nama, nip, mulai, selesai, ttd_p = row
+                ttd_bytes = None
+                if ttd_p:
+                    full_p = os.path.join(BASE_DIR, 'public', ttd_p.lstrip('/\\')) if not os.path.isabs(ttd_p) else ttd_p
+                    if os.path.exists(full_p):
+                        try:
+                            with open(full_p, 'rb') as fp:
+                                ttd_bytes = fp.read()
+                        except Exception:
+                            pass
+                conn.close()
+                return {
+                    'nama': nama,
+                    'nip': nip or 'NIP -',
+                    'ttd_bytes': ttd_bytes,
+                    'is_new': (pid > 1) or (nama != default_sig['nama'])
+                }
+        conn.close()
+    except Exception as e:
+        pass
+
+    # 2. Fallback to app_settings
+    try:
+        settings = db.get_all_app_settings()
+        transisi = str(settings.get('ketua_transisi_tanggal', '2026-10-01')).strip() or '2026-10-01'
+        nama_baru = str(settings.get('ketua_baru_nama', '')).strip()
+        nip_baru = str(settings.get('ketua_baru_nip', '')).strip()
+        ttd_path = str(settings.get('ketua_baru_ttd_path', '')).strip()
+
+        if not nama_baru:
+            return default_sig
+
+        if ymd and ymd < transisi:
+            return default_sig
+
+        ttd_bytes = None
+        if ttd_path:
+            full_ttd_path = os.path.join(BASE_DIR, 'public', ttd_path.lstrip('/\\')) if not os.path.isabs(ttd_path) else ttd_path
+            if os.path.exists(full_ttd_path):
+                with open(full_ttd_path, 'rb') as f:
+                    ttd_bytes = f.read()
+
+        return {
+            'nama': nama_baru,
+            'nip': nip_baru or 'NIP -',
+            'ttd_bytes': ttd_bytes,
+            'is_new': True
+        }
+    except Exception:
+        return default_sig
+
 def generate_certificate_docx(data: dict, qr_bytes: bytes = None, output_filename: str = None) -> tuple:
     """
     Generates single official TELP Certificate DOCX using docxtpl and exact placeholder rules.
@@ -143,6 +243,31 @@ def generate_certificate_docx(data: dict, qr_bytes: bytes = None, output_filenam
     show_validation_logo = bool(data.get("show_validation_logo", True))
     show_cap_ttd = bool(data.get("show_cap_ttd", True))
 
+    # Resolve signatory data
+    nama_pejabat = data.get("nama_pejabat")
+    nip_pejabat = data.get("nip_pejabat")
+    ttd_bytes = None
+
+    if data.get("ttd_base64"):
+        try:
+            ttd_bytes = base64.b64decode(data.get("ttd_base64"))
+        except Exception:
+            pass
+    elif data.get("ttd_path") and os.path.exists(data.get("ttd_path")):
+        try:
+            with open(data.get("ttd_path"), "rb") as f_ttd:
+                ttd_bytes = f_ttd.read()
+        except Exception:
+            pass
+
+    if not nama_pejabat:
+        tgl_tes_str = str(data.get("tanggal_tes", "")).strip()
+        sig_info = resolve_signatory_py(tgl_tes_str)
+        nama_pejabat = sig_info.get("nama")
+        nip_pejabat = sig_info.get("nip")
+        if not ttd_bytes and sig_info.get("ttd_bytes"):
+            ttd_bytes = sig_info.get("ttd_bytes")
+
     transparent_bytes = get_transparent_png_bytes()
     out_zip_buf = io.BytesIO()
 
@@ -150,7 +275,19 @@ def generate_certificate_docx(data: dict, qr_bytes: bytes = None, output_filenam
         with zipfile.ZipFile(out_zip_buf, "w", zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
                 content = zin.read(item.filename)
-                if item.filename == "word/media/image7.png":
+                if item.filename == "word/document.xml":
+                    if nama_pejabat and nama_pejabat != "Dr. Soni Tantan Tandiana, S.Pd.":
+                        try:
+                            content_str = content.decode("utf-8")
+                            content_str = content_str.replace("Dr. Soni Tantan Tandiana, S.Pd.", nama_pejabat)
+                            if nip_pejabat:
+                                content_str = content_str.replace("NIP 197009152021211004", nip_pejabat)
+                            content = content_str.encode("utf-8")
+                        except Exception:
+                            pass
+                elif item.filename == "word/media/image8.png" and ttd_bytes:
+                    content = ttd_bytes
+                elif item.filename == "word/media/image7.png":
                     if not show_validation_logo:
                         content = transparent_bytes
                 elif item.filename == "word/media/image6.png":
