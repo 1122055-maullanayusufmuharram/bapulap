@@ -113,7 +113,7 @@ def resolve_signatory_py(tgl_tes_str: str) -> dict:
     # 1. Query multi-period table
     try:
         import sqlite3
-        conn = sqlite3.connect(DATABASE_PATH)
+        conn = sqlite3.connect(db.DB_PATH)
         cur = conn.cursor()
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='signatory_periods'")
         if cur.fetchone():
